@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""
+EPNET 블록체인 마이닝 명령어 인터페이스
+
+사용법: Pppmine ep -<월렛 주소>
+"""
+
+import os
+import sys
+import logging
+import argparse
+import time
+from config import setup_logging, ensure_data_directory
+
+# 로깅 설정
+setup_logging()
+
+def display_intro():
+    """
+    소개 화면을 표시합니다.
+    """
+    print("""\
+ ________  ________  ________   ________  _________   
+|\   __  \|\   __  \|\   ___  \|\   ____\|\___   ___\ 
+\ \  \|\  \ \  \|\  \ \  \\ \  \ \  \___|\|___ \  \_| 
+ \ \   ____\ \   ____\ \  \\ \  \ \  \        \ \  \  
+  \ \  \___|\ \  \___|\ \  \\ \  \ \  \____    \ \  \ 
+   \ \__\    \ \__\    \ \__\\ \__\ \_______\   \ \__\\
+    \|__|     \|__|     \|__| \|__|\|_______|    \|__|
+                                                       
+ EPNET Blockchain Mining Tool
+ 실제 암호화폐를 채굴합니다 - 블록당 50 EP 보상
+""")
+
+def parse_arguments():
+    """
+    명령행 인수를 파싱합니다.
+    """
+    parser = argparse.ArgumentParser(description="EPNET 블록체인 마이닝 도구")
+    parser.add_argument('command', help='명령 (지원 명령: ep)', choices=['ep'])
+    parser.add_argument('wallet', help='마이닝 보상을 받을 지갑 주소 (-로 시작)')
+    
+    args = parser.parse_args()
+    
+    # 월렛 주소 형식 확인
+    if not args.wallet.startswith('-'):
+        parser.error("월렛 주소는 '-'로 시작해야 합니다 (예: -YOUR_WALLET_ADDRESS)")
+    
+    # '-' 제거
+    wallet_address = args.wallet[1:]
+    
+    return wallet_address
+
+def start_mining(wallet_address):
+    """
+    채굴을 시작하고 지정된 지갑 주소로 보상을 보냅니다.
+    """
+    from epmine import start_mining as run_mining
+    
+    print(f"\n지갑 주소 {wallet_address}로 채굴을 시작합니다...")
+    print("채굴은 백그라운드에서 실행됩니다. Ctrl+C를 눌러 종료할 수 있습니다.")
+    
+    try:
+        run_mining(wallet_address)
+    except KeyboardInterrupt:
+        print("\n채굴이 중지되었습니다.")
+    except Exception as e:
+        print(f"\n오류 발생: {e}")
+        logging.error(f"채굴 중 오류: {e}")
+        return 1
+    
+    return 0
+
+def main():
+    """
+    메인 함수
+    """
+    ensure_data_directory()
+    display_intro()
+    
+    try:
+        wallet_address = parse_arguments()
+        return start_mining(wallet_address)
+    except Exception as e:
+        print(f"오류 발생: {e}")
+        logging.error(f"명령 실행 중 오류: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
