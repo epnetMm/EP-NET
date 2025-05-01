@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-feather="repeat" class="me-2"></i>
+                    Transaction History
+                </h2>
+                
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td>
+                                    {% if tx.type == 'incoming' %}
+                                    <span class="badge bg-success">
+                                        <i data-feather="arrow-down" class="feather-sm"></i>
+                                        Received
+                                    </span>
+                                    {% elif tx.type == 'outgoing' %}
+                                    <span class="badge bg-primary">
+                                        <i data-feather="arrow-up" class="feather-sm"></i>
+                                        Sent
+                                    </span>
+                                    {% elif tx.type == 'mining_reward' %}
+                                    <span class="badge bg-warning">
+                                        <i data-feather="award" class="feather-sm"></i>
+                                        Mining Reward
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td title="{{ tx.sender }}">{{ tx.sender }}</td>
+                                <td title="{{ tx.recipient }}">{{ tx.recipient }}</td>
+                                <td>{{ tx.amount }} EP</td>
+                                <td>{{ tx.timestamp }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    No transactions found for your wallet address. Try mining some blocks to earn EP or receive a transaction from another user.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="credit-card" class="me-2"></i>
+                    Wallet Summary
+                </h4>
+                <ul class="list-group list-group-flush bg-dark">
+                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                        <span>Your Address:</span>
+                        <a href="#" class="text-truncate" style="max-width: 150px;" 
+                           data-bs-toggle="tooltip" data-bs-placement="top" title="{{ wallet_address }}">
+                            {{ wallet_address[:10] }}...
+                        </a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                        <span>Current Balance:</span>
+                        <strong>{{ wallet_balance }} EP</strong>
+                    </li>
+                </ul>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('wallet') }}" class="btn btn-primary">
+                        <i data-feather="send" class="feather-sm me-1"></i>
+                        Send EP
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Transaction Info
+                </h4>
+                <p>Transactions on EPNET blockchain:</p>
+                <ul>
+                    <li>Use SHA-256 for cryptographic security</li>
+                    <li>Are verified by PoW consensus</li>
+                    <li>Include digital signatures for authentication</li>
+                    <li>Enter the mempool before being mined into blocks</li>
+                </ul>
+                <div class="alert alert-secondary">
+                    <small>
+                        <i data-feather="alert-circle" class="feather-sm me-1"></i>
+                        Mining rewards are transactions with sender address "0".
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

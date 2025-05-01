@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Mining{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-feather="cpu" class="me-2"></i>
+                    Mine EP Cryptocurrency
+                </h2>
+                
+                <p class="lead">
+                    Mining is the process of adding new blocks to the blockchain and earning EP rewards.
+                    EPNET uses Proof of Work (PoW) consensus with SHA-256 hashing algorithm.
+                </p>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Mining Status</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                {% if is_mining %}
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Mining...</span>
+                                </div>
+                                {% else %}
+                                <i data-feather="pause-circle" class="text-secondary" style="width: 2em; height: 2em;"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if is_mining %}
+                                <h4 class="text-success mb-0">Mining Active</h4>
+                                <p class="text-muted mb-0">Your node is currently mining new blocks</p>
+                                {% else %}
+                                <h4 class="text-secondary mb-0">Mining Inactive</h4>
+                                <p class="text-muted mb-0">Your node is not currently mining</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {% if is_mining %}
+                            <form action="{{ url_for('stop_mining') }}" method="post">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i data-feather="stop-circle" class="feather-sm me-1"></i>
+                                    Stop Mining
+                                </button>
+                            </form>
+                            {% else %}
+                            <form action="{{ url_for('start_mining') }}" method="post">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i data-feather="play-circle" class="feather-sm me-1"></i>
+                                    Start Mining
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <h5>How Mining Works on EPNET</h5>
+                <p>
+                    Mining is the process of solving complex mathematical problems using computational power. 
+                    When you mine, your computer:
+                </p>
+                <ol>
+                    <li>Collects pending transactions from the network</li>
+                    <li>Assembles them into a block</li>
+                    <li>Computes a valid proof of work by finding a nonce value</li>
+                    <li>Broadcasts the new block to the network</li>
+                    <li>Receives a mining reward in EP cryptocurrency</li>
+                </ol>
+                
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    <strong>Mining requires computational resources.</strong> 
+                    This process will utilize your CPU. It's recommended to monitor system resources while mining.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="award" class="me-2"></i>
+                    Mining Rewards
+                </h4>
+                <p>
+                    Successfully mining a block earns you EP as a reward for your contribution to the network security.
+                </p>
+                <ul class="list-group list-group-flush bg-dark">
+                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                        <span>Current Reward:</span>
+                        <strong>{{ mining_reward }} EP</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                        <span>Circulating Supply:</span>
+                        <strong>{{ current_supply }} EP</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                        <span>Maximum Supply:</span>
+                        <strong>{{ max_supply }} EP</strong>
+                    </li>
+                </ul>
+                <div class="progress mt-3" style="height: 20px;" title="{{ (current_supply / max_supply * 100)|round(4) }}% mined">
+                    <div class="progress-bar bg-success" 
+                         role="progressbar" 
+                         style="width: {{ (current_supply / max_supply * 100)|round(2) }}%;" 
+                         aria-valuenow="{{ current_supply }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="{{ max_supply }}">
+                        {{ (current_supply / max_supply * 100)|round(2) }}%
+                    </div>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    Percentage of total supply that has been mined
+                </small>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Mining Information
+                </h4>
+                <p>
+                    EPNET uses the Proof of Work (PoW) consensus mechanism with the SHA-256 hashing algorithm for mining.
+                </p>
+                <h5>Mining Benefits</h5>
+                <ul>
+                    <li>Earn EP cryptocurrency rewards</li>
+                    <li>Contribute to network security</li>
+                    <li>Help process transactions</li>
+                    <li>Support the decentralized network</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    The mining difficulty automatically adjusts based on network conditions.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_mining %}
+<div class="card shadow-sm mt-2">
+    <div class="card-body">
+        <h4 class="card-title">
+            <i data-feather="activity" class="me-2"></i>
+            Live Mining Activity
+        </h4>
+        <div class="alert alert-success">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border text-success me-3" role="status">
+                    <span class="visually-hidden">Mining...</span>
+                </div>
+                <div>
+                    <h5 class="alert-heading mb-1">Mining in Progress</h5>
+                    <p class="mb-0">
+                        Your node is actively mining blocks. When a new block is found, you will receive a mining reward of up to {{ mining_reward }} EP.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <p>
+            Mining activity will continue until you stop it manually or until the maximum supply of EP ({{ max_supply }}) is reached.
+            The mining process is fully decentralized and helps secure the EPNET blockchain.
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Reload the page every 30 seconds to update mining status
+    {% if is_mining %}
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+    {% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i data-feather="link" class="me-2"></i>
+                    Welcome to EPNET Blockchain
+                </h2>
+                <p class="card-text">
+                    EPNET is a fully decentralized blockchain network with its native cryptocurrency EP. 
+                    This implementation uses the Proof of Work (PoW) consensus mechanism 
+                    and SHA-256 hashing algorithm for enhanced security.
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-dark mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i data-feather="layers" class="me-2"></i>
+                                    Blockchain Status
+                                </h5>
+                                <ul class="list-group list-group-flush bg-dark">
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Current Height:</span>
+                                        <strong>{{ blockchain_info.chain_length }}</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Circulating Supply:</span>
+                                        <strong>{{ blockchain_info.current_supply }} EP</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Maximum Supply:</span>
+                                        <strong>{{ blockchain_info.max_supply }} EP</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Pending Transactions:</span>
+                                        <strong>{{ blockchain_info.pending_transactions }}</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i data-feather="credit-card" class="me-2"></i>
+                                    Your Wallet
+                                </h5>
+                                <ul class="list-group list-group-flush bg-dark">
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Address:</span>
+                                        <strong title="{{ wallet_info.address }}">{{ wallet_info.address[:10] }}...</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between bg-dark">
+                                        <span>Balance:</span>
+                                        <strong>{{ wallet_info.balance }} EP</strong>
+                                    </li>
+                                </ul>
+                                <div class="d-grid gap-2 mt-3">
+                                    <a href="{{ url_for('wallet') }}" class="btn btn-primary">
+                                        <i data-feather="arrow-right" class="feather-sm me-1"></i>
+                                        Manage Wallet
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="cpu" class="me-2"></i>
+                    Mining Status
+                </h4>
+                <p class="card-text">
+                    {% if is_mining %}
+                    <span class="badge bg-success">Active</span> Mining operations are currently running.
+                    {% else %}
+                    <span class="badge bg-secondary">Inactive</span> Mining operations are currently stopped.
+                    {% endif %}
+                </p>
+                <div class="d-grid gap-2">
+                    {% if is_mining %}
+                    <form action="{{ url_for('stop_mining') }}" method="post">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i data-feather="stop-circle" class="feather-sm me-1"></i>
+                            Stop Mining
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('start_mining') }}" method="post">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i data-feather="play-circle" class="feather-sm me-1"></i>
+                            Start Mining
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Quick Facts
+                </h4>
+                <ul class="list-group list-group-flush bg-dark">
+                    <li class="list-group-item bg-dark">
+                        <i data-feather="shield" class="me-2 text-success"></i>
+                        Enhanced security with SHA-256
+                    </li>
+                    <li class="list-group-item bg-dark">
+                        <i data-feather="server" class="me-2 text-primary"></i>
+                        Fully decentralized network
+                    </li>
+                    <li class="list-group-item bg-dark">
+                        <i data-feather="cpu" class="me-2 text-warning"></i>
+                        Proof of Work consensus
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark">
+                <h5 class="mb-0">
+                    <i data-feather="database" class="me-2"></i>
+                    Latest Blocks
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Height</th>
+                                <th>Hash</th>
+                                <th>Time</th>
+                                <th>Txs</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for block in latest_blocks %}
+                            <tr>
+                                <td>{{ block.index }}</td>
+                                <td title="{{ block.hash }}">{{ block.hash[:10] }}...</td>
+                                <td>{{ block.timestamp }}</td>
+                                <td>{{ block.transaction_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-grid gap-2 mt-2">
+                    <a href="{{ url_for('blockchain_explorer') }}" class="btn btn-outline-primary">
+                        View All Blocks
+                        <i data-feather="arrow-right" class="feather-sm ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark">
+                <h5 class="mb-0">
+                    <i data-feather="repeat" class="me-2"></i>
+                    Pending Transactions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in pending_transactions %}
+                            <tr>
+                                <td>{{ tx.sender }}</td>
+                                <td>{{ tx.recipient }}</td>
+                                <td>{{ tx.amount }} EP</td>
+                                <td>{{ tx.timestamp }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <em>No pending transactions</em>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-grid gap-2 mt-2">
+                    <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary">
+                        View All Transactions
+                        <i data-feather="arrow-right" class="feather-sm ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh the page every 30 seconds to update mining status
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}

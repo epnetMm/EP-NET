@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Blockchain Explorer{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="card-title mb-4">
+            <i data-feather="database" class="me-2"></i>
+            Blockchain Explorer
+        </h2>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Height</th>
+                        <th>Hash</th>
+                        <th>Previous Hash</th>
+                        <th>Timestamp</th>
+                        <th>Transactions</th>
+                        <th>Nonce</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for block in blocks %}
+                    <tr>
+                        <td>{{ block.index }}</td>
+                        <td title="{{ block.hash }}">
+                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                {{ block.hash }}
+                            </span>
+                        </td>
+                        <td title="{{ block.previous_hash }}">
+                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                {{ block.previous_hash }}
+                            </span>
+                        </td>
+                        <td>{{ block.timestamp }}</td>
+                        <td>{{ block.transaction_count }}</td>
+                        <td>{{ block.nonce }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#blockModal{{ block.index }}">
+                                <i data-feather="eye" class="feather-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Blockchain explorer pagination">
+            <ul class="pagination justify-content-center mt-4">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('blockchain_explorer', page=page-1) }}">
+                        <i data-feather="chevron-left" class="feather-sm"></i>
+                        Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i data-feather="chevron-left" class="feather-sm"></i>
+                        Previous
+                    </span>
+                </li>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('blockchain_explorer', page=p) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('blockchain_explorer', page=page+1) }}">
+                        Next
+                        <i data-feather="chevron-right" class="feather-sm"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Next
+                        <i data-feather="chevron-right" class="feather-sm"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Block Detail Modals -->
+{% for block in blocks %}
+<div class="modal fade" id="blockModal{{ block.index }}" tabindex="-1" aria-labelledby="blockModalLabel{{ block.index }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blockModalLabel{{ block.index }}">
+                    <i data-feather="box" class="me-2"></i>
+                    Block #{{ block.index }} Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Block Hash:</h6>
+                    <div class="p-2 bg-dark rounded">
+                        <code>{{ block.hash }}</code>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Previous Block Hash:</h6>
+                    <div class="p-2 bg-dark rounded">
+                        <code>{{ block.previous_hash }}</code>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Timestamp:</h6>
+                        <p>{{ block.timestamp }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Nonce:</h6>
+                        <p>{{ block.nonce }}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Transactions ({{ block.transaction_count }}):</h6>
+                    {% if block.transaction_count > 0 %}
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        This block contains {{ block.transaction_count }} transactions. Visit the transactions page to see all transactions.
+                    </div>
+                    {% else %}
+                    <p><em>This block contains no transactions (Genesis block or empty block).</em></p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
