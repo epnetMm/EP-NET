@@ -1,2 +1,2 @@
 # EP-NET
-This is the source code of EPNET
+This is the prototype source code of EPNET
